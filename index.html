@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook + Caption Generator | Mission to Monetize</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B0C08;--ink-soft:#13140F;--panel:#1A1C14;
+  --cream:#F0EBD8;--cream-muted:#8A8470;
+  --rose:#C9A84C;--rose-light:#DDB96A;--rose-deep:#8B6E2A;
+  --line:rgba(201,168,76,.22);--line-soft:rgba(240,235,216,.08);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:
+    radial-gradient(ellipse 90% 40% at 50% 0%, rgba(201,168,76,.07), transparent 55%),
+    var(--ink);
+  color:var(--cream);font-family:var(--sans);line-height:1.55;min-height:100vh;padding:0 0 80px;
+}
+
+/* ── progress ── */
+.progress-wrap{position:sticky;top:0;z-index:10;background:rgba(14,14,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 20px}
+.progress-inner{max-width:620px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.brand-sm{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--rose-light);white-space:nowrap;font-weight:600}
+.steps-row{display:flex;gap:6px;flex:1}
+.step-pip{flex:1;height:3px;border-radius:2px;background:rgba(201,168,76,.18);transition:background .4s}
+.step-pip.done{background:var(--rose)}
+.step-pip.active{background:linear-gradient(90deg,var(--rose-light),var(--rose))}
+.step-label{font-size:11px;color:var(--cream-muted);white-space:nowrap}
+
+/* ── hero ── */
+.hero-wrap{max-width:620px;margin:0 auto;padding:40px 20px 28px;text-align:center}
+.hero{font-family:var(--serif);font-weight:600;font-size:clamp(28px,7.5vw,46px);line-height:1.05;letter-spacing:-.01em;margin-bottom:12px}
+.hero em{font-style:italic;color:var(--rose-light)}
+.hero-sub{font-size:15px;color:var(--cream-muted);max-width:420px;margin:0 auto}
+
+/* ── stage ── */
+.stage{display:none;max-width:620px;margin:0 auto;padding:0 20px}
+.stage.active{display:block;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── eyebrow ── */
+.eyebrow{font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--rose);font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ── panel / fields ── */
+.panel{background:linear-gradient(160deg,var(--ink-soft),var(--panel));border:1px solid var(--line);border-radius:20px;padding:26px 22px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-muted);margin-bottom:7px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;background:#0D0E09;border:1px solid rgba(245,239,231,.10);color:var(--cream);font-family:var(--sans);font-size:15px;padding:13px 15px;border-radius:12px;outline:none;transition:border-color .18s,box-shadow .18s}
+.field textarea{resize:vertical;min-height:60px;line-height:1.5}
+.field input::placeholder,.field textarea::placeholder{color:#6A6455}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(201,168,76,.14)}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A84C' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+.hint{font-size:12px;color:#6A6455;margin-top:5px}
+.row2{display:flex;gap:12px}
+.row2 .field{flex:1}
+
+/* ── buttons ── */
+.btn{width:100%;border:none;cursor:pointer;margin-top:10px;background:linear-gradient(105deg,var(--rose-light),var(--rose) 55%,var(--rose-deep));color:#1A0F12;font-family:var(--sans);font-weight:600;font-size:16px;padding:17px;border-radius:14px;box-shadow:0 8px 28px rgba(201,168,76,.22);transition:transform .15s,box-shadow .15s,filter .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 12px 34px rgba(201,168,76,.28);filter:brightness(1.04)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--cream-muted);font-family:var(--sans);font-weight:500;font-size:14px;padding:11px 20px;border-radius:12px;cursor:pointer;transition:border-color .15s,color .15s}
+.btn-ghost:hover{border-color:var(--rose);color:var(--rose-light)}
+.btn-secondary{width:100%;border:1px solid var(--line);background:transparent;color:var(--cream);font-family:var(--sans);font-weight:500;font-size:15px;padding:14px;border-radius:14px;cursor:pointer;margin-top:10px;transition:border-color .15s,color .15s}
+.btn-secondary:hover{border-color:var(--rose);color:var(--rose-light)}
+
+/* ── status / loading ── */
+.status{text-align:center;font-size:14px;color:var(--rose-light);margin-top:18px;display:none;padding:16px}
+.status.show{display:block}
+.status.err{color:#E0A0A8}
+.dots::after{content:"";animation:dots 1.4s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+/* ── hooks grid ── */
+.hooks-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.hook-card{background:#0D0E09;border:1px solid var(--line-soft);border-radius:12px;padding:14px 44px 14px 14px;font-size:15px;color:var(--cream);line-height:1.5;cursor:pointer;position:relative;transition:border-color .15s,background .15s}
+.hook-card:hover{border-color:var(--rose);background:#131018}
+.hook-card::after{content:"copy";position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6A6455;font-weight:500}
+.hook-card.tapped::after{content:"✓";color:var(--rose-light)}
+.hook-card.tapped{border-color:var(--rose)}
+
+/* ── result cards ── */
+.r-card{background:linear-gradient(160deg,var(--ink-soft),var(--panel));border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:10px}
+.r-card-head{padding:13px 18px 11px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between}
+.r-card-label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--rose);font-weight:600}
+.r-card-body{padding:14px 18px}
+.r-card-val{font-size:15px;color:var(--cream);line-height:1.65;white-space:pre-wrap}
+
+/* ── copy btn ── */
+.copy-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);color:var(--cream-muted);font-family:var(--sans);font-weight:500;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;transition:border-color .15s,color .15s,background .15s;flex-shrink:0}
+.copy-btn:hover{border-color:var(--rose);color:var(--rose-light)}
+.copy-btn.copied{border-color:var(--rose);color:var(--rose-light);background:rgba(201,168,76,.08)}
+.copy-btn-lg{display:flex;align-items:center;gap:6px;margin-top:10px;background:transparent;border:1px solid var(--line);color:var(--cream-muted);font-family:var(--sans);font-weight:500;font-size:13px;padding:8px 14px;border-radius:10px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.copy-btn-lg:hover{border-color:var(--rose);color:var(--rose-light)}
+.copy-btn-lg.copied{border-color:var(--rose);color:var(--rose-light);background:rgba(201,168,76,.08)}
+
+/* ── DM script badge ── */
+.dm-badge{display:inline-block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(201,168,76,.15);color:var(--rose-light);margin-bottom:10px}
+
+/* ── nav / footer ── */
+.nav-row{display:flex;gap:10px;margin-top:20px}
+.nav-row .btn{margin-top:0}
+.restart-row{text-align:center;margin-top:14px}
+.restart-btn{background:transparent;border:none;color:var(--cream-muted);font-family:var(--sans);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.restart-btn:hover{color:var(--rose-light)}
+.divider{height:1px;background:var(--line);margin:20px 0}
+.footer{text-align:center;margin-top:40px;color:#4A4830;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+
+@media(max-width:480px){.row2{flex-direction:column;gap:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <span class="brand-sm">Mission to Monetize</span>
+    <div class="steps-row">
+      <div class="step-pip active" id="pip-1"></div>
+      <div class="step-pip" id="pip-2"></div>
+    </div>
+    <span class="step-label" id="step-label">Step 1 of 2</span>
+  </div>
+</div>
+
+<div class="hero-wrap">
+  <h1 class="hero">Stop the <em>scroll.</em></h1>
+  <p class="hero-sub">Tell me what you're promoting. Get scroll-stopping hooks, a ready caption, a DM script, and hashtags — generated for your exact offer in seconds.</p>
+</div>
+
+<!-- ── STAGE 1 — Intake ── -->
+<div class="stage active" id="stage-1">
+  <div class="eyebrow">Content intake</div>
+  <div class="panel">
+
+    <div class="field">
+      <label for="offer">What are you promoting?</label>
+      <input id="offer" type="text" placeholder="e.g. my $37 Veteran to CEO Idea Finder app">
+    </div>
+
+    <div class="field">
+      <label for="audience">Who's it for?</label>
+      <input id="audience" type="text" placeholder="e.g. women veterans / transitioning service members / military spouses">
+    </div>
+
+    <div class="field">
+      <label for="pain">The painful problem it solves</label>
+      <input id="pain" type="text" placeholder="e.g. they have no idea what business to start after separating">
+    </div>
+
+    <div class="field">
+      <label for="result">The result or win they get</label>
+      <input id="result" type="text" placeholder="e.g. a real business idea built on their military skills in 60 seconds">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="platform">Platform</label>
+        <select id="platform">
+          <option>TikTok</option>
+          <option>Instagram Reels</option>
+          <option>Instagram Post</option>
+          <option>Facebook</option>
+          <option>LinkedIn</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="vibe">Vibe</label>
+        <select id="vibe">
+          <option value="bold">Bold &amp; punchy</option>
+          <option value="warm">Warm &amp; relatable</option>
+          <option value="authority">Authority / expert</option>
+          <option value="story">Story-driven</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="keyword">DM keyword</label>
+      <input id="keyword" type="text" value="BOSS">
+      <div class="hint">The word people comment to trigger your DM funnel.</div>
+    </div>
+
+    <button class="btn" id="go-btn" onclick="generate()">Generate my content →</button>
+    <div class="status" id="status-1"></div>
+  </div>
+  <div class="footer" style="margin-top:28px">Mission to Monetize · theladydivibe.com</div>
+</div>
+
+<!-- ── STAGE 2 — Content Drop ── -->
+<div class="stage" id="stage-2">
+
+  <div style="text-align:center;padding:24px 20px 8px">
+    <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--rose-light);font-weight:600;margin-bottom:6px">Content drop — <span id="s2-offer-label"></span></div>
+    <p style="font-size:14px;color:var(--cream-muted)">Tap any hook to copy it. Every section has its own copy button.</p>
+  </div>
+
+  <!-- Hooks -->
+  <div class="eyebrow" style="margin-top:20px">Hooks — tap to copy</div>
+  <div class="hooks-grid" id="hooks-grid"></div>
+  <button class="btn-secondary" id="regen-btn" onclick="generate()">↻ Generate new hooks</button>
+
+  <div class="divider"></div>
+
+  <!-- Caption -->
+  <div class="eyebrow">Ready-to-post caption</div>
+  <div class="r-card">
+    <div class="r-card-head">
+      <div class="r-card-label">Caption — <span id="s2-platform-label" style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--cream-muted)"></span></div>
+      <button class="copy-btn" id="cb-caption" onclick="copyEl('s2-caption','cb-caption')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+    <div class="r-card-body">
+      <div class="r-card-val" id="s2-caption"></div>
+    </div>
+  </div>
+
+  <!-- Hashtags -->
+  <div class="r-card">
+    <div class="r-card-head">
+      <div class="r-card-label">Hashtags</div>
+      <button class="copy-btn" id="cb-tags" onclick="copyEl('s2-tags','cb-tags')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+    <div class="r-card-body">
+      <div class="r-card-val" id="s2-tags" style="color:var(--rose-light);word-spacing:3px"></div>
+    </div>
+  </div>
+
+  <!-- DM Script -->
+  <div class="r-card">
+    <div class="r-card-head">
+      <div class="r-card-label">Auto-DM script</div>
+      <button class="copy-btn" id="cb-dm" onclick="copyEl('s2-dm','cb-dm')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+    <div class="r-card-body">
+      <div class="dm-badge">Paste into ManyChat or Instagram Auto-DM</div>
+      <div class="r-card-val" id="s2-dm"></div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="goBack()">← Back</button>
+    <button class="btn" onclick="reset()">↻ New content drop</button>
+  </div>
+
+  <div class="footer" style="margin-top:36px">Mission to Monetize · links.theladydivibe.com</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let _lastInputs = null;
+
+function showStage(n){
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  $('stage-'+n).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  $('pip-1').className = 'step-pip' + (n > 1 ? ' done' : ' active');
+  $('pip-2').className = 'step-pip' + (n === 2 ? ' active' : '');
+  $('step-label').textContent = n === 1 ? 'Step 1 of 2' : 'Step 2 of 2 — Content drop';
+}
+function goBack(){ showStage(1); }
+
+async function generate(){
+  const v = {
+    offer:    $('offer').value.trim(),
+    audience: $('audience').value.trim(),
+    pain:     $('pain').value.trim(),
+    result:   $('result').value.trim(),
+    platform: $('platform').value,
+    vibe:     $('vibe').value,
+    keyword:  ($('keyword').value.trim() || 'BOSS').toUpperCase()
+  };
+
+  if(!v.offer || !v.audience){
+    showStatus("Add what you're promoting and who it's for to get started.", true);
+    return;
+  }
+
+  _lastInputs = v;
+  $('go-btn').disabled = true;
+  const regenBtn = $('regen-btn');
+  if(regenBtn) regenBtn.disabled = true;
+  showStatus('<span class="dots">Writing your content drop</span>', false);
+
+  const vibeGuide = {
+    bold:      'Bold, direct, punchy — short declarative sentences. No fluff. Pattern interrupt energy.',
+    warm:      'Warm, personal, relatable — feels like a text from a friend who gets it. Light and human.',
+    authority: 'Confident expert — specific, credible, outcome-focused. Shows deep knowledge without being cold.',
+    story:     'Story-driven — opens with a moment, a before/after, or a specific memory. Emotional and real.'
+  }[v.vibe] || 'Bold and punchy.';
+
+  const platformGuide = {
+    'TikTok':           'TikTok: hooks are ultra-short (under 10 words), captions are brief (60–80 words max), conversational, fast-paced.',
+    'Instagram Reels':  'Instagram Reels: hooks 8–12 words, captions 80–120 words, slightly more polished than TikTok, still punchy.',
+    'Instagram Post':   'Instagram Post: hooks 10–15 words, captions 100–150 words, more storytelling space, ends with a clear CTA.',
+    'Facebook':         'Facebook: hooks 12–18 words, captions 120–180 words, more conversational and community-focused.',
+    'LinkedIn':         'LinkedIn: hooks 12–18 words, captions 120–160 words, professional but personal, outcome and credibility focused.'
+  }[v.platform] || '';
+
+  const prompt = `You are a social media content strategist writing scroll-stopping content for a veteran entrepreneur selling digital products. Your job is to write genuinely compelling content — not templates, not fill-in-the-blank, not generic coaching fluff.
+
+WHAT'S BEING PROMOTED:
+- Offer: ${v.offer}
+- Audience: ${v.audience}
+- Problem it solves: ${v.pain || 'not specified'}
+- Result the buyer gets: ${v.result || 'not specified'}
+- Platform: ${v.platform}
+- Vibe: ${v.vibe} — ${vibeGuide}
+- DM keyword: ${v.keyword}
+
+PLATFORM GUIDANCE: ${platformGuide}
+
+RULES:
+1. Hooks must feel written by a real person, not a marketing robot. No "Are you a [audience] who struggles with [pain]?" patterns — those are dead. Write hooks that feel fresh, specific, earned.
+2. Each of the 6 hooks must use a DIFFERENT format — e.g. one POV, one confession, one bold claim, one question that actually makes someone stop, one relatable moment, one "I built this" angle.
+3. The caption must sound like the creator's actual voice — warm, direct, specific. It must naturally work in "comment ${v.keyword} and I'll send you the link" near the end.
+4. The DM script is the auto-reply that fires when someone comments the keyword. It should feel personal, not automated. 3–4 sentences. Delivers the value promise, creates anticipation, ends with a soft CTA to click the link.
+5. Hashtags: 10–12 tags. Mix niche-specific, audience-specific, and reach tags. Include #m2mskool #missiontomonetize.
+6. No bullet points in the caption or DM script — write in flowing sentences and short paragraphs.
+
+Return ONLY valid JSON, no markdown, no commentary:
+{
+  "hooks": [
+    "hook 1 — ultra-specific, fresh format",
+    "hook 2 — different format",
+    "hook 3 — different format",
+    "hook 4 — different format",
+    "hook 5 — different format",
+    "hook 6 — different format"
+  ],
+  "caption": "full ready-to-post caption with the ${v.keyword} trigger naturally woven in near the end — appropriate length for ${v.platform}",
+  "hashtags": "#tag1 #tag2 #tag3 #tag4 #tag5 #tag6 #tag7 #tag8 #tag9 #tag10 #tag11 #tag12",
+  "dmScript": "The auto-DM message that fires when someone comments ${v.keyword}. Warm, personal, 3–4 sentences. Ends with: 👉 [YOUR LINK HERE]"
+}`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1400,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+    const data = await res.json();
+    let text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    text = text.replace(/```json/gi,'').replace(/```/g,'').trim();
+    const o = JSON.parse(text);
+    render(o, v);
+  } catch(e){
+    console.error(e);
+    showStatus("That run didn't complete — tap the button to try again.", true);
+    $('go-btn').disabled = false;
+    if(regenBtn) regenBtn.disabled = false;
+  }
+}
+
+function render(o, v){
+  $('status-1').className = 'status';
+  $('go-btn').disabled = false;
+  const regenBtn = $('regen-btn');
+  if(regenBtn) regenBtn.disabled = false;
+
+  $('s2-offer-label').textContent  = v.offer;
+  $('s2-platform-label').textContent = v.platform;
+
+  // hooks
+  const grid = $('hooks-grid'); grid.innerHTML = '';
+  (o.hooks || []).forEach(h => {
+    const div = document.createElement('div');
+    div.className = 'hook-card';
+    div.textContent = h;
+    div.onclick = () => {
+      navigator.clipboard.writeText(h).then(() => {
+        div.classList.add('tapped');
+        setTimeout(() => div.classList.remove('tapped'), 1800);
+      });
+    };
+    grid.appendChild(div);
+  });
+
+  $('s2-caption').textContent = o.caption  || '—';
+  $('s2-tags').textContent    = o.hashtags || '—';
+  $('s2-dm').textContent      = o.dmScript || '—';
+
+  showStage(2);
+}
+
+function reset(){
+  ['offer','audience','pain','result'].forEach(id => $(id).value = '');
+  $('keyword').value = 'BOSS';
+  $('platform').selectedIndex = 0;
+  $('vibe').selectedIndex = 0;
+  $('status-1').className = 'status';
+  $('go-btn').disabled = false;
+  showStage(1);
+}
+
+function copyEl(srcId, btnId){
+  const text = $(srcId).textContent || '';
+  const btn  = $(btnId);
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+    setTimeout(() => {btn.innerHTML = orig; btn.classList.remove('copied');}, 2000);
+  });
+}
+
+function showStatus(html, isErr){
+  const s = $('status-1');
+  s.innerHTML = html;
+  s.className = 'status show' + (isErr ? ' err' : '');
+}
+</script>
+</body>
+</html>
