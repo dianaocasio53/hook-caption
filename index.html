@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook + Caption Generator | Mission to Monetize</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E0E10;--ink-soft:#17151A;--panel:#1E1A20;--cream:#F5EFE7;
+    --rose:#B76E79;--rose-light:#C9818A;--rose-deep:#8E545E;
+    --muted:#9A8F94;--line:rgba(183,110,121,.28);
+    --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:radial-gradient(120% 80% at 50% -10%,rgba(183,110,121,.10),transparent 60%),var(--ink);
+    color:var(--cream);font-family:var(--sans);line-height:1.55;min-height:100vh;padding:28px 18px 60px}
+  .wrap{max-width:620px;margin:0 auto}
+  .brand{font-weight:600;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--rose-light);
+    display:flex;align-items:center;gap:10px;justify-content:center}
+  .brand::before,.brand::after{content:"";height:1px;width:34px;background:linear-gradient(90deg,transparent,var(--rose))}
+  .brand::after{background:linear-gradient(90deg,var(--rose),transparent)}
+  .hero{font-family:var(--serif);font-weight:600;font-size:clamp(28px,7.4vw,44px);line-height:1.06;
+    text-align:center;margin:20px 0 12px;letter-spacing:-.01em}
+  .hero em{font-style:italic;color:var(--rose-light)}
+  .sub{text-align:center;color:var(--muted);font-size:15px;max-width:450px;margin:0 auto 30px}
+
+  .panel{background:linear-gradient(180deg,var(--ink-soft),var(--panel));border:1px solid var(--line);
+    border-radius:18px;padding:24px 20px}
+  .eyebrow{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--rose);font-weight:600;
+    margin-bottom:18px;display:flex;align-items:center;gap:9px}
+  .eyebrow span{height:6px;width:6px;border-radius:50%;background:var(--rose)}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:7px;font-weight:500}
+  .field input,.field select{width:100%;background:#100E13;border:1px solid rgba(245,239,231,.12);
+    color:var(--cream);font-family:var(--sans);font-size:15px;padding:13px 14px;border-radius:11px;outline:none;
+    transition:border-color .18s,box-shadow .18s}
+  .field input::placeholder{color:#6B636A}
+  .field input:focus,.field select:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(183,110,121,.16)}
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23B76E79' stroke-width='1.6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+  .hint{font-size:12px;color:#6B636A;margin-top:6px}
+  .row{display:flex;gap:12px}.row .field{flex:1}
+
+  .toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#100E13;
+    border:1px solid rgba(245,239,231,.12);border-radius:11px;padding:13px 14px;margin-bottom:16px;cursor:pointer}
+  .toggle-txt{font-size:14px;color:var(--cream)}
+  .toggle-txt small{display:block;color:#6B636A;font-size:11.5px;margin-top:2px}
+  .switch{position:relative;width:46px;height:26px;flex:0 0 auto;border-radius:20px;background:#3A343B;transition:background .2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:var(--cream);transition:transform .2s}
+  .toggle.on .switch{background:linear-gradient(100deg,var(--rose-light),var(--rose))}
+  .toggle.on .switch::after{transform:translateX(20px)}
+
+  .cta{width:100%;border:none;cursor:pointer;margin-top:8px;
+    background:linear-gradient(100deg,var(--rose-light),var(--rose) 55%,var(--rose-deep));
+    color:#1A0F12;font-weight:600;font-size:16px;padding:16px;border-radius:13px;
+    box-shadow:0 8px 24px rgba(183,110,121,.28);transition:transform .15s,box-shadow .15s,filter .15s}
+  .cta:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(183,110,121,.4);filter:brightness(1.04)}
+  .cta:active{transform:translateY(0)}
+  .cta:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none}
+  .status{text-align:center;font-size:14px;margin-top:18px;display:none;color:var(--rose-light)}
+  .status.show{display:block}
+  .status.err{color:#E0A0A8}
+  .dots::after{content:"";animation:dots 1.4s steps(4,end) infinite}
+  @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+  .drop{display:none;margin-top:26px;animation:rise .5s ease both}
+  .drop.show{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .d-head{border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;
+    background:linear-gradient(180deg,rgba(183,110,121,.16),transparent);padding:20px 22px 16px;text-align:center}
+  .d-tag{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--rose-light);font-weight:600}
+  .d-name{font-family:var(--serif);font-size:clamp(22px,6vw,30px);font-weight:600;margin-top:6px}
+  .d-body{border:1px solid var(--line);border-radius:0 0 18px 18px;background:var(--ink-soft);padding:6px 22px 22px}
+  .block{padding:18px 0;border-bottom:1px solid rgba(245,239,231,.08)}
+  .block:last-of-type{border-bottom:none}
+  .block-k{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose);font-weight:600;
+    margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .hook{background:#100E13;border:1px solid rgba(245,239,231,.08);border-radius:10px;padding:12px 44px 12px 14px;
+    margin-bottom:8px;font-size:15px;cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+  .hook:hover{border-color:var(--rose);background:#161018}
+  .hook::after{content:"copy";position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B636A}
+  .hook.copied::after{content:"copied ✓";color:var(--rose-light)}
+  .box{background:#100E13;border:1px solid rgba(245,239,231,.1);border-radius:12px;padding:15px;
+    font-size:14.5px;color:#E7DED7;white-space:pre-wrap;line-height:1.55}
+  .tags{color:var(--rose-light);font-size:14px;word-spacing:2px}
+  .copybtn{background:transparent;border:1px solid var(--rose);color:var(--rose-light);font-family:var(--sans);
+    font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:8px;
+    cursor:pointer;transition:background .15s,color .15s}
+  .copybtn:hover{background:var(--rose);color:var(--ink)}
+  .ctrls{display:flex;gap:10px;margin-top:18px}
+  .ctrls button{flex:1;background:transparent;border:1px solid rgba(245,239,231,.16);color:var(--cream);
+    font-family:var(--sans);font-size:13px;font-weight:500;padding:12px;border-radius:11px;cursor:pointer;
+    transition:border-color .15s,color .15s}
+  .ctrls button:hover{border-color:var(--rose);color:var(--rose-light)}
+  .footer{text-align:center;margin-top:34px;color:#5E565C;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Mission to Monetize</div>
+    <h1 class="hero">Hooks that <em>stop the scroll.</em></h1>
+    <p class="sub">Tell it what you're promoting. Real AI writes scroll-stopping hooks, a caption, hashtags, and your DM script — tuned to your exact offer.</p>
+
+    <div class="panel" id="intake">
+      <div class="eyebrow"><span></span>Content intake</div>
+
+      <div class="field">
+        <label for="offer">What are you promoting?</label>
+        <input id="offer" type="text" placeholder="e.g. my $17 meal planner app">
+      </div>
+      <div class="field">
+        <label for="aud">Who's it for?</label>
+        <input id="aud" type="text" placeholder="e.g. busy moms / women veterans / new coaches">
+      </div>
+      <div class="field">
+        <label for="pain">The painful problem (optional)</label>
+        <input id="pain" type="text" placeholder="e.g. the 5pm what's-for-dinner panic">
+      </div>
+      <div class="field">
+        <label for="result">The result or win (optional)</label>
+        <input id="result" type="text" placeholder="e.g. dinner sorted in 15 minutes">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="platform">Platform</label>
+          <select id="platform">
+            <option>TikTok</option><option>Instagram Reels</option><option>Instagram Post</option>
+            <option>Facebook</option><option>LinkedIn</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="vibe">Vibe</label>
+          <select id="vibe">
+            <option>Bold &amp; punchy</option><option>Warm &amp; relatable</option>
+            <option>Authority / expert</option><option>Story-driven</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="key">DM keyword</label>
+        <input id="key" type="text" value="BOSS">
+        <div class="hint">The word people comment to trigger your DM funnel.</div>
+      </div>
+
+      <div class="toggle" id="trendToggle" onclick="toggleTrends()">
+        <div class="toggle-txt">Use live trends
+          <small>Searches the web for what's working now (slightly slower + costs a bit more)</small>
+        </div>
+        <div class="switch"></div>
+      </div>
+
+      <button class="cta" id="go" onclick="generate()">Generate my content</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <section class="drop" id="drop" aria-live="polite">
+      <div class="d-head">
+        <div class="d-tag">Content drop</div>
+        <div class="d-name">Ready to post 🌹</div>
+      </div>
+      <div class="d-body">
+        <div class="block">
+          <div class="block-k"><span>Hooks · tap to copy</span></div>
+          <div id="d-hooks"></div>
+        </div>
+        <div class="block">
+          <div class="block-k"><span>Caption</span><button class="copybtn" onclick="copyText(window._cap,this)">Copy</button></div>
+          <div class="box" id="d-cap"></div>
+        </div>
+        <div class="block">
+          <div class="block-k"><span>Hashtags</span><button class="copybtn" onclick="copyText(window._tags,this)">Copy</button></div>
+          <div class="box tags" id="d-tags"></div>
+        </div>
+        <div class="block">
+          <div class="block-k"><span>Auto-DM script</span><button class="copybtn" onclick="copyText(window._dm,this)">Copy</button></div>
+          <div class="box" id="d-dm"></div>
+          <div class="hint">Paste into ManyChat or your Instagram Auto-DM. Replace [LINK] with your product link.</div>
+        </div>
+        <div class="ctrls">
+          <button onclick="generate()">🔁 New drop</button>
+          <button onclick="reset()">↻ Start over</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">Mission to Monetize · links.theladydivibe.com</div>
+  </div>
+
+<script>
+// ============================================================
+//  PASTE YOUR CLOUDFLARE WORKER URL BELOW (from the setup guide)
+// ============================================================
+const ENDPOINT = "PASTE_YOUR_WORKER_URL_HERE";
+
+const $=id=>document.getElementById(id);
+let useTrends=false;
+function toggleTrends(){useTrends=!useTrends;$('trendToggle').classList.toggle('on',useTrends);}
+
+async function generate(){
+  const payload={
+    offer:$('offer').value.trim(), audience:$('aud').value.trim(),
+    pain:$('pain').value.trim(), result:$('result').value.trim(),
+    platform:$('platform').value, vibe:$('vibe').value,
+    keyword:($('key').value.trim()||"BOSS"), trends:useTrends
+  };
+  if(!payload.offer || !payload.audience){
+    return setStatus("Add what you're promoting and who it's for.", true);
+  }
+  if(ENDPOINT.indexOf("PASTE_YOUR")===0){
+    return setStatus("Almost there — paste your Worker URL into the code first (see the setup guide).", true);
+  }
+
+  $('go').disabled=true; $('drop').classList.remove('show');
+  setStatus(`<span class="dots">${useTrends?"Scanning trends & writing":"Writing your content"}</span>`, false);
+
+  try{
+    const res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(data.error){ setStatus(data.error, true); $('go').disabled=false; return; }
+    render(data);
+  }catch(e){
+    setStatus("Couldn't reach the AI. Check your connection and try again.", true);
+  }
+  $('go').disabled=false;
+}
+
+function render(d){
+  $('status').classList.remove('show');
+  const hooksEl=$('d-hooks'); hooksEl.innerHTML="";
+  (d.hooks||[]).forEach(l=>{
+    const div=document.createElement('div'); div.className='hook'; div.textContent=l;
+    div.onclick=()=>{copyText(l,null); div.classList.add('copied'); setTimeout(()=>div.classList.remove('copied'),1500);};
+    hooksEl.appendChild(div);
+  });
+  window._cap=d.caption||""; $('d-cap').textContent=window._cap;
+  window._tags=(d.hashtags||[]).join(" "); $('d-tags').textContent=window._tags;
+  window._dm=d.dm||""; $('d-dm').textContent=window._dm;
+  $('drop').classList.add('show');
+  $('drop').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copyText(t,btn){
+  navigator.clipboard.writeText(t||"").then(()=>{
+    if(btn){const o=btn.textContent;btn.textContent="Copied ✓";setTimeout(()=>btn.textContent=o,1500);}
+  });
+}
+function setStatus(html,err){const s=$('status');s.innerHTML=html;s.className='status show'+(err?' err':'');}
+function reset(){$('drop').classList.remove('show');$('status').classList.remove('show');window.scrollTo({top:0,behavior:'smooth'});}
+</script>
+</body>
+</html>
